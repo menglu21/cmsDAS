@@ -60,6 +60,9 @@ class photonAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       virtual void beginJob() override;
       virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
       virtual void endJob() override;
+	float EAch(float x); 
+	float EAnh(float x);
+	float EApho(float x);
 
       // ----------member data ---------------------------
 //      edm::EDGetTokenT<TrackCollection> tracksToken_;  //used to select what tracks to read from configuration file
@@ -154,21 +157,25 @@ photonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    iEvent.getByToken(photonToken_, photons);
 
    iEvent.getByToken(rhoToken_ ,rho_ );
+   double rhoVal_;
+   rhoVal_=-99.;
+   rhoVal_ = *rho_;
    // The reco-level photon candidates have been sorted by pT, we just select the leading-pT one in a single event for simplicity 
-   std::cout<<"photon size:"<<photons->size()<<std::endl;
    if(photons->size()<1) {outTree_->Fill();return;}
    const auto pho = photons->ptrAt(0);
    photon_pt = pho->pt();
-   std::cout<<"photon pt:"<<pho->pt()<<std::endl;
    photon_eta = pho->superCluster()->eta();
-   std::cout<<"photon eta:"<<pho->superCluster()->eta()<<std::endl;
    photon_phi = pho->superCluster()->phi();
    photon_e = pho->energy();
    HoverE = pho->hadTowOverEm();
    sieie = pho->full5x5_sigmaIetaIeta();
+   // PFIso_corrected = max(PFIso - rho*EA, 0.)
    chIso = pho->chargedHadronIso();
+   chIso = std::max(0.0, chIso - rhoVal_*EAch(fabs(photon_eta)));
    neuIso = pho->neutralHadronIso();
+   neuIso = std::max(0.0, neuIso - rhoVal_*EAnh(fabs(photon_eta)));
    phoIso = pho->photonIso();
+   phoIso = std::max(0.0, phoIso - rhoVal_*EApho(fabs(photon_eta)));
    passEleVeto = pho->passElectronVeto();
    outTree_->Fill();
 }
@@ -213,6 +220,37 @@ photonAnalyzer::setDummyValues(){
         neuIso=-99.;
         phoIso=-99.;
         passEleVeto=-99;
+}
+
+float ZPKUTreeMaker::EAch( float x){
+	float EA = 0.0112;
+	if(x>1.0)   EA = 0.0108;
+	if(x>1.479) EA = 0.0106;
+	if(x>2.0)   EA = 0.01002;
+	if(x>2.2)   EA = 0.0098;
+	if(x>2.3)   EA = 0.0089;
+	if(x>2.4)   EA = 0.0087;
+	return EA;
+}
+float ZPKUTreeMaker::EAnh( float x){
+	float EA = 0.0668;
+	if(x>1.0)   EA = 0.1054;
+	if(x>1.479) EA = 0.0786;
+	if(x>2.0)   EA = 0.0233;
+	if(x>2.2)   EA = 0.0078;
+	if(x>2.3)   EA = 0.0028;
+	if(x>2.4)   EA = 0.0137;
+	return EA;
+}
+float ZPKUTreeMaker::EApho( float x){
+	float EA = 0.1113;
+	if(x>1.0)   EA = 0.0953;
+	if(x>1.479) EA = 0.0619;
+	if(x>2.0)   EA = 0.0837;
+	if(x>2.2)   EA = 0.1070;
+	if(x>2.3)   EA = 0.1212;
+	if(x>2.4)   EA = 0.1466;
+	return EA;
 }
 
 //define this as a plug-in
