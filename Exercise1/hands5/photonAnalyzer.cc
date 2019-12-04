@@ -222,7 +222,7 @@ photonAnalyzer::setDummyValues(){
         passEleVeto=-99;
 }
 
-float ZPKUTreeMaker::EAch( float x){
+float photonAnalyzer::EAch( float x){
 	float EA = 0.0112;
 	if(x>1.0)   EA = 0.0108;
 	if(x>1.479) EA = 0.0106;
@@ -232,7 +232,7 @@ float ZPKUTreeMaker::EAch( float x){
 	if(x>2.4)   EA = 0.0087;
 	return EA;
 }
-float ZPKUTreeMaker::EAnh( float x){
+float photonAnalyzer::EAnh( float x){
 	float EA = 0.0668;
 	if(x>1.0)   EA = 0.1054;
 	if(x>1.479) EA = 0.0786;
@@ -242,7 +242,7 @@ float ZPKUTreeMaker::EAnh( float x){
 	if(x>2.4)   EA = 0.0137;
 	return EA;
 }
-float ZPKUTreeMaker::EApho( float x){
+float photonAnalyzer::EApho( float x){
 	float EA = 0.1113;
 	if(x>1.0)   EA = 0.0953;
 	if(x>1.479) EA = 0.0619;
